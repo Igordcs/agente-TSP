@@ -14,7 +14,7 @@ public class Populacao {
     }
 
     public Rota getMelhorIndividuo() {
-        return individuos[0];
+        return this.individuos[0];
     }
 
     public Rota[] getIndividuos() {

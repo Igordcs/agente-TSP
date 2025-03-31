@@ -1,6 +1,6 @@
 # ASPECTOS QUE DEVEM SER ABORDADOS
 
-## 1. Representação (definição do indivíduo) -> Lista das cidades ([1,3,4,5,6])
+## 1. Representação (definição do indivíduo) -> Lista das cidades ([1,3,4,5,6]) ou classe ROTA
 
 ## 2. Função de Avaliação (função de aptidão) ---> A FAZER
 
