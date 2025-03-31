@@ -1,18 +1,18 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Stack;
 
 public class AgenteGenetico {
     private int[][] matrizDistancias;
     private List<Integer> cidadesEntrada = new ArrayList<Integer>();
     private int TAMANHO_POPULACAO = 500; // rever essas constantes
-    private double PROBABILIDADE_MUTACAO = 0.7; // rever essas constantes
-    private int QUANTIDADE_REPETICOES = 25;
-    private Stack<Integer> pilhaDistancia = new Stack<Integer>();
+    private double PROBABILIDADE_MUTACAO = 0.15; // rever essas constantes
+    private int QUANTIDADE_REPETICOES = 300;
+    private int TAMANHO_TORNEIO = 5;
     private Random aleatorio = new Random();
 
     public AgenteGenetico(int[][] distancias, List<Integer> cidades) {
@@ -94,12 +94,13 @@ public class AgenteGenetico {
         // inicializa a população
         Populacao populacao = inicializaPopulacao();
         Rota melhorIndividuo = null;
+        int geracao = 0;
 
         // evolui a população até X gerações convergirem pra um mesmo valor
-        while (pilhaDistancia.size() < QUANTIDADE_REPETICOES) {
-            // populacao = evoluirPopulacao();
+        while (geracao < QUANTIDADE_REPETICOES) {
+            populacao = evoluirPopulacao(populacao);
             melhorIndividuo = populacao.getMelhorIndividuo();
-            adicionarDistancia(melhorIndividuo.distancia);
+            geracao++;
         }
 
         if (melhorIndividuo == null) {
@@ -114,15 +115,85 @@ public class AgenteGenetico {
     }
 
     // seleciona os pais e gera uma nova população de acordo com esses 2 pais
-    public Populacao evoluirPopulacao() {
-        return null;
+    public Populacao evoluirPopulacao(Populacao _populacao) {
+        // elitismo (vamo manter os 2 melhores de cada geração antes de evoluir)
+        Rota[] antigosIndividuos = _populacao.getIndividuos();
+        Rota[] novosIndividuos = new Rota[TAMANHO_POPULACAO];
+        novosIndividuos[0] = _populacao.individuos[0];
+        novosIndividuos[1] = _populacao.individuos[1];
+
+        for (int i = 1; i < TAMANHO_POPULACAO; i++) {
+            Rota pai = selecionaPai(antigosIndividuos);
+            Rota pai2 = selecionaPai(antigosIndividuos);
+
+            Rota filho = cruzaIndividuos(pai, pai2);
+
+            if (aleatorio.nextDouble() < PROBABILIDADE_MUTACAO) {
+                filho = mutaIndividuo(filho);
+            }
+
+            filho.distancia = calcularDistancia(filho.cidades);
+            novosIndividuos[i] = filho;
+        }
+
+        return new Populacao(novosIndividuos);
     }
 
-    public void adicionarDistancia(int distancia) {
-        // distancia for diferente, limpa a pilha pois a geração não está convergindo
-        if (pilhaDistancia.empty() || pilhaDistancia.peek() != distancia) {
-            pilhaDistancia.clear();
+    public Rota selecionaPai(Rota[] cidades) {
+        // vamo utilizar a seleção por torneio, dado um tamanho K de indivíduos
+        // aleatórios, a gente vai escolher o mais apto entre esses K
+        Rota[] individuos = new Rota[TAMANHO_TORNEIO];
+        for (int i = 0; i < TAMANHO_TORNEIO; i++) {
+            int rotaAleatoria = aleatorio.nextInt(cidades.length - 1);
+            individuos[i] = cidades[rotaAleatoria];
         }
-        pilhaDistancia.add(distancia);
+        Arrays.sort(individuos);
+        return individuos[0];
+    }
+
+    public Rota cruzaIndividuos(Rota pai1, Rota pai2) {
+        List<Integer> cidadesFilho = new ArrayList<>();
+        List<Integer> cidadesPai1 = new ArrayList<>(pai1.cidades);
+        List<Integer> cidadesPai2 = new ArrayList<>(pai2.cidades);
+
+        int tamanho = cidadesPai1.size() - 1; // Ignora a última cidade (repetição da primeira)
+        int pontoCorte = aleatorio.nextInt(tamanho - 1) + 1; // Ponto entre 1 e tamanho-1
+
+        // 1. Copia a primeira parte do pai1 (até o ponto de corte)
+        for (int i = 0; i < pontoCorte; i++) {
+            cidadesFilho.add(cidadesPai1.get(i));
+        }
+
+        // 2. Completa com as cidades do pai2 que não estão no filho ainda
+        for (int i = 0; i < cidadesPai2.size(); i++) {
+            int cidade = cidadesPai2.get(i);
+            if (!cidadesFilho.contains(cidade)) {
+                cidadesFilho.add(cidade);
+            }
+        }
+
+        // 3. Garante que termina na cidade inicial
+        cidadesFilho.add(cidadesFilho.get(0));
+
+        return new Rota(cidadesFilho, calcularDistancia(cidadesFilho));
+    }
+
+    public Rota mutaIndividuo(Rota individuo) {
+        // gera 2 números aleatórios entre o início e fim e troca as cidades de posição
+        List<Integer> cidadesIndividuo = new ArrayList<>(individuo.cidades);
+        int tamanho = cidadesIndividuo.size() - 1;
+        if (tamanho > 1) {
+            int aleatorio1 = aleatorio.nextInt(tamanho - 1) + 1;
+            int aleatorio2 = aleatorio.nextInt(tamanho - 1) + 1;
+
+            // evitar que seja a mesma posição
+            while (aleatorio1 == aleatorio2) {
+                aleatorio2 = aleatorio.nextInt(tamanho - 1) + 1;
+            }
+
+            Collections.swap(cidadesIndividuo, aleatorio1, aleatorio2);
+            cidadesIndividuo.set(cidadesIndividuo.size() - 1, cidadesIndividuo.get(0));
+        }
+        return new Rota(cidadesIndividuo, calcularDistancia(cidadesIndividuo));
     }
 }

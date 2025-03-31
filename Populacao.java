@@ -8,11 +8,6 @@ public class Populacao {
         Arrays.sort(individuos);
     }
 
-    // retorna os 2 melhores indivíduos
-    public Rota[] getPais() {
-        return null;
-    }
-
     public Rota getMelhorIndividuo() {
         return this.individuos[0];
     }
