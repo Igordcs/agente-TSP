@@ -7,14 +7,15 @@ import java.util.List;
 public class main {
     public static void main(String[] args) {
         int[][] matrizDistancias = carregarMatrizDistancias("cities.txt");
+        AgenteGenetico agente = new AgenteGenetico(matrizDistancias);
         List<Integer> rota = new ArrayList<>();
+
         rota.add(20);
         rota.add(0);
         rota.add(13);
         rota.add(43);
         rota.add(25);
-        AgenteGenetico agente = new AgenteGenetico(matrizDistancias, rota);
-        agente.resolver();
+        agente.resolver(rota);
     }
 
     private static int[][] carregarMatrizDistancias(String caminhoArquivo) {
