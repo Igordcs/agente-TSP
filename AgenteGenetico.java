@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -31,28 +32,29 @@ public class AgenteGenetico {
         return new Populacao(individuos);
     }
 
+    // Gera uma rota com as cidades de entrada + cidades aleatórias
     public Rota geraRotaAleatoria() {
-        List<Integer> rota = new ArrayList<>();
+        Set<Integer> cidadesSet = new LinkedHashSet<>(this.cidadesEntrada);
+
         int cidadeInicial = this.cidadesEntrada.get(0);
-        for (int cidade : this.cidadesEntrada) {
-            rota.add(cidade);
-        }
+        int tamanhoRota = aleatorio.nextInt(matrizDistancias.length - (1 + cidadesSet.size())) + 1;
 
-        int tamanhoRota = aleatorio.nextInt(matrizDistancias.length - (1 + rota.size())) + 1;
-        for (int i = 0; i < tamanhoRota; i++) {
+        while (cidadesSet.size() < tamanhoRota) {
             int cidadeAleatoria = aleatorio.nextInt(tamanhoRota) + 1;
-            rota.add(cidadeAleatoria);
+            cidadesSet.add(cidadeAleatoria);
         }
 
-        // aplica um shuffle nas cidades intermediárias
+        List<Integer> rota = new ArrayList<>(cidadesSet);
+
+        // embaralha as cidades intermediárias
         if (rota.size() > 2) {
             Collections.shuffle(rota.subList(1, rota.size()));
         }
 
         // garante que termina e começa com a mesma cidade
         rota.add(cidadeInicial);
-        int distancia = calcularDistancia(rota);
-        return new Rota(rota, distancia);
+
+        return new Rota(rota, calcularDistancia(rota));
     }
 
     public int calcularDistancia(List<Integer> cidades) {
