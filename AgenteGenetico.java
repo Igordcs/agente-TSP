@@ -2,9 +2,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public class AgenteGenetico {
     private int[][] matrizDistancias;
@@ -139,16 +141,23 @@ public class AgenteGenetico {
         return new Populacao(novosIndividuos);
     }
 
-    public Rota selecionaPai(Rota[] cidades) {
-        // vamo utilizar a seleção por torneio, dado um tamanho K de indivíduos
-        // aleatórios, a gente vai escolher o mais apto entre esses K
-        Rota[] individuos = new Rota[TAMANHO_TORNEIO];
-        for (int i = 0; i < TAMANHO_TORNEIO; i++) {
-            int rotaAleatoria = aleatorio.nextInt(cidades.length - 1);
-            individuos[i] = cidades[rotaAleatoria];
+    public Rota selecionaPai(Rota[] individuos) {
+        // seleção por torneio: escolher o mais apto entre K indivíduos aleatórios
+        Set<Integer> indices = new HashSet<>();
+        Rota[] candidatos = new Rota[TAMANHO_TORNEIO];
+
+        // seleciona candidatos distintos
+        while (indices.size() < TAMANHO_TORNEIO && indices.size() < individuos.length) {
+            int indiceCandidato = aleatorio.nextInt(individuos.length);
+
+            if (!indices.contains(indiceCandidato)) {
+                candidatos[indices.size()] = individuos[indiceCandidato];
+                indices.add(indiceCandidato);
+            }
         }
-        Arrays.sort(individuos);
-        return individuos[0];
+
+        Arrays.sort(candidatos);
+        return candidatos[0];
     }
 
     public Rota cruzaIndividuos(Rota pai1, Rota pai2) {
