@@ -5,15 +5,15 @@ import java.util.List;
 
 public class Rota implements Comparable<Rota> {
     public List<Integer> cidades = new ArrayList<>();
-    public int distancia;
+    public long distancia;
 
-    public Rota(List<Integer> rota, int distancia) {
+    public Rota(List<Integer> rota, long distancia) {
         this.cidades = rota;
         this.distancia = distancia;
     }
 
     @Override
     public int compareTo(Rota other) {
-        return Integer.compare(this.distancia, other.distancia);
+        return Long.compare(this.distancia, other.distancia);
     }
 }

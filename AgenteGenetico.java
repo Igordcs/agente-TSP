@@ -10,9 +10,10 @@ import java.util.Set;
 public class AgenteGenetico {
     private int[][] matrizDistancias;
     private List<Integer> cidadesEntrada = new ArrayList<Integer>();
-    private int TAMANHO_POPULACAO = 500;
+    private int TAMANHO_POPULACAO = 20;
+    private int MAX_GERACOES = 500;
+    private int MAX_GERACOES_SEM_MELHORIA = 50;
     private double PROBABILIDADE_CROSSOVER = 0.8;
-    private int QUANTIDADE_REPETICOES = 300;
     private int TAMANHO_TORNEIO = 5;
     private Random random = new Random();
 
@@ -20,7 +21,6 @@ public class AgenteGenetico {
         this.matrizDistancias = distancias;
     }
 
-    // inicializa a população com rotas aleatórias
     public Populacao inicializaPopulacao() {
         Rota[] individuos = new Rota[TAMANHO_POPULACAO];
         for (int i = 0; i < TAMANHO_POPULACAO; i++) {
@@ -50,16 +50,16 @@ public class AgenteGenetico {
         return new Rota(rota, calcularDistancia(rota));
     }
 
-    public int calcularDistancia(List<Integer> cidades) {
+    public long calcularDistancia(List<Integer> cidades) {
         int cidadeAnterior = cidades.get(0);
-        int distanciaTotal = 0;
+        long distanciaTotal = 0;
 
         for (int i = 1; i < cidades.size(); i++) {
             int cidadeAtual = cidades.get(i);
 
             if (cidadeAnterior < 0 || cidadeAnterior >= matrizDistancias.length ||
                     cidadeAtual < 0 || cidadeAtual >= matrizDistancias[0].length) {
-                return Integer.MAX_VALUE; // Rota inválida
+                return Long.MAX_VALUE; // Rota inválida
             }
 
             distanciaTotal += matrizDistancias[cidadeAnterior][cidadeAtual];
@@ -74,24 +74,28 @@ public class AgenteGenetico {
 
         Populacao populacao = inicializaPopulacao();
         Rota melhorIndividuo = null;
+        long melhorDistancia = Long.MAX_VALUE;
+
+        int geracoesSemMelhoria = 0;
         int geracao = 0;
 
-        // evolui a população até X gerações convergirem pra um mesmo valor
-        while (geracao < QUANTIDADE_REPETICOES) {
+        while (geracao < MAX_GERACOES && geracoesSemMelhoria < MAX_GERACOES_SEM_MELHORIA) {
             populacao = evoluirPopulacao(populacao);
             melhorIndividuo = populacao.getMelhorIndividuo();
             geracao++;
+
+            long distanciaAtual = melhorIndividuo.distancia;
+
+            if (distanciaAtual < melhorDistancia) {
+                melhorDistancia = distanciaAtual;
+                geracoesSemMelhoria = 0;
+            } else {
+                geracoesSemMelhoria++;
+            }
         }
 
-        if (melhorIndividuo == null) {
-            System.out.println("Não foi possível gerar a melhor rota contendo essas cidades");
-            return;
-        }
-
-        for (int cidade : melhorIndividuo.cidades) {
-            System.out.printf("%d; ", cidade);
-        }
-
+        System.out.println("Geração: " + geracao);
+        System.out.println("Rota: " + melhorIndividuo.cidades);
         System.out.println("Menor distância: " + melhorIndividuo.distancia);
     }
 
@@ -145,7 +149,7 @@ public class AgenteGenetico {
         LinkedHashSet<Integer> cidadesFilhoSet = new LinkedHashSet<>();
 
         int tamanho = cidadesPai1.size() - 1; // Ignora a última cidade (repetição da primeira)
-        int pontoCorte = random.nextInt(tamanho - 1) + 1; // Ponto entre 1 e tamanho - 1
+        int pontoCorte = random.nextInt(tamanho - 1) + 1;
 
         // 1. Copia a primeira parte do pai1 (até o ponto de corte)
         cidadesFilhoSet.addAll(cidadesPai1.subList(0, pontoCorte));
