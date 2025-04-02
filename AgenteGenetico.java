@@ -115,9 +115,7 @@ public class AgenteGenetico {
         for (int i = permanece; i < TAMANHO_POPULACAO; i++) {
             Rota pai1 = selecionaPai(antigosIndividuos);
             Rota pai2 = selecionaPai(antigosIndividuos);
-
-            boolean crossover = random.nextDouble() < PROBABILIDADE_CROSSOVER;
-            Rota filho = crossover ? cruzaIndividuos(pai1, pai2) : pai1;
+            Rota filho = cruzaIndividuos(pai1, pai2);
 
             filho = mutaIndividuo(filho);
             filho.distancia = calcularDistancia(filho.cidades);
@@ -147,6 +145,10 @@ public class AgenteGenetico {
     }
 
     public Rota cruzaIndividuos(Rota pai1, Rota pai2) {
+        if (random.nextDouble() > PROBABILIDADE_CROSSOVER) {
+            return random.nextBoolean() ? pai1 : pai2;
+        }
+
         List<Integer> cidadesPai1 = new ArrayList<>(pai1.cidades);
         List<Integer> cidadesPai2 = new ArrayList<>(pai2.cidades);
         LinkedHashSet<Integer> cidadesFilhoSet = new LinkedHashSet<>();
