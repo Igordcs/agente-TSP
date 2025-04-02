@@ -174,7 +174,7 @@ public class AgenteGenetico {
     public Rota mutaIndividuo(Rota individuo) {
         List<Integer> cidadesIndividuo = new ArrayList<>(individuo.cidades);
         int tamanho = cidadesIndividuo.size();
-        double probabilidadeMutacao = 1.0 / (tamanho);
+        double probabilidadeMutacao = 0.15;
 
         if (tamanho <= 3) {
             return individuo;
