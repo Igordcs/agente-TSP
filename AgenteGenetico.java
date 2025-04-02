@@ -10,7 +10,7 @@ import java.util.Set;
 public class AgenteGenetico {
     private int[][] matrizDistancias;
     private List<Integer> cidadesEntrada = new ArrayList<Integer>();
-    private int TAMANHO_POPULACAO = 20;
+    private int TAMANHO_POPULACAO = 50;
     private int MAX_GERACOES = 500;
     private int MAX_GERACOES_SEM_MELHORIA = 50;
     private double PROBABILIDADE_CROSSOVER = 0.8;
@@ -104,8 +104,8 @@ public class AgenteGenetico {
         Rota[] antigosIndividuos = populacao.getIndividuos();
         Rota[] novosIndividuos = new Rota[TAMANHO_POPULACAO];
 
-        // elitismo: mantém os melhores indivíduos (20%)
-        int permanece = (int) (TAMANHO_POPULACAO * 0.2);
+        // elitismo: mantém os melhores indivíduos (5%)
+        int permanece = (int) (TAMANHO_POPULACAO * 0.05);
 
         for (int i = 0; i < permanece; i++) {
             novosIndividuos[i] = antigosIndividuos[i];
