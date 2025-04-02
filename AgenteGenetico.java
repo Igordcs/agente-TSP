@@ -96,20 +96,23 @@ public class AgenteGenetico {
 
         System.out.println("Geração: " + geracao);
         System.out.println("Rota: " + melhorIndividuo.cidades);
-        System.out.println("Menor distância: " + melhorIndividuo.distancia);
+        System.out.println("Distância: " + melhorIndividuo.distancia);
+        System.out.println();
     }
 
-    // seleciona os pais e gera uma nova população de acordo com esses 2 pais
     public Populacao evoluirPopulacao(Populacao populacao) {
         Rota[] antigosIndividuos = populacao.getIndividuos();
         Rota[] novosIndividuos = new Rota[TAMANHO_POPULACAO];
 
-        // elitismo: manter os 2 melhores de cada geração antes de evoluir
-        for (int i = 0; i < 2; i++) {
+        // elitismo: mantém os melhores indivíduos (20%)
+        int permanece = (int) (TAMANHO_POPULACAO * 0.2);
+
+        for (int i = 0; i < permanece; i++) {
             novosIndividuos[i] = antigosIndividuos[i];
         }
 
-        for (int i = 2; i < TAMANHO_POPULACAO; i++) {
+        // seleciona os pais e gera novos indivíduos
+        for (int i = permanece; i < TAMANHO_POPULACAO; i++) {
             Rota pai1 = selecionaPai(antigosIndividuos);
             Rota pai2 = selecionaPai(antigosIndividuos);
 
@@ -148,20 +151,20 @@ public class AgenteGenetico {
         List<Integer> cidadesPai2 = new ArrayList<>(pai2.cidades);
         LinkedHashSet<Integer> cidadesFilhoSet = new LinkedHashSet<>();
 
-        int tamanho = cidadesPai1.size() - 1; // Ignora a última cidade (repetição da primeira)
+        int tamanho = cidadesPai1.size() - 1; // ignora a última cidade
         int pontoCorte = random.nextInt(tamanho - 1) + 1;
 
-        // 1. Copia a primeira parte do pai1 (até o ponto de corte)
+        // copia a primeira parte do pai1 (até o ponto de corte)
         cidadesFilhoSet.addAll(cidadesPai1.subList(0, pontoCorte));
 
-        // 2. Adiciona cidades do pai2 que não estão no filho ainda
+        // adiciona cidades do pai2 que não estão no filho ainda
         for (int cidade : cidadesPai2) {
             if (!cidadesFilhoSet.contains(cidade)) {
                 cidadesFilhoSet.add(cidade);
             }
         }
 
-        // 3. Adiciona a cidade inicial no final
+        // adiciona a cidade inicial no final
         List<Integer> cidadesFilho = new ArrayList<>(cidadesFilhoSet);
         cidadesFilho.add(cidadesFilho.get(0));
 
